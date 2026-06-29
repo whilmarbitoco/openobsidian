@@ -40,7 +40,7 @@ What DCMA does:
 
 DCMA runs entirely on your machine. Your data never leaves your device.
 
-To set it up, run DCMA locally and set its URL in OpenObsidian Settings (default: `http://localhost:3030`).
+DCMA is private and access is restricted — contact [Whilmar Bitoco](https://github.com/whilmarbitoco) for early/beta access.
 
 ## Architecture
 
