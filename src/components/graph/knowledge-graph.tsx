@@ -31,7 +31,7 @@ interface TooltipState {
 
 const TAG_COLORS: Record<string, string> = {
   default: "#6366f1",
-  project: "#f59e0b",
+  project: "#8b5cf6",
   idea: "#10b981",
   person: "#ec4899",
   topic: "#3b82f6",
@@ -91,6 +91,20 @@ export function KnowledgeGraph({
     svg.selectAll("*").remove()
     svg.attr("width", width).attr("height", height)
 
+    const defs = svg.append("defs")
+
+    const filter = defs.append("filter")
+      .attr("id", "node-glow")
+      .attr("x", "-50%")
+      .attr("y", "-50%")
+      .attr("width", "200%")
+      .attr("height", "200%")
+    filter.append("feDropShadow")
+      .attr("dx", 0)
+      .attr("dy", 0)
+      .attr("stdDeviation", 8)
+      .attr("flood-color", "rgba(139, 92, 246, 0.4)")
+
     const g = svg.append("g")
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
@@ -124,14 +138,30 @@ export function KnowledgeGraph({
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(40))
 
+    const edgeGradients = defs.selectAll("linearGradient")
+      .data(simLinks)
+      .join("linearGradient")
+      .attr("id", (_, i) => `eg-${i}`)
+      .attr("gradientUnits", "userSpaceOnUse")
+
+    edgeGradients.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#8b5cf6")
+      .attr("stop-opacity", 0.6)
+
+    edgeGradients.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#8b5cf6")
+      .attr("stop-opacity", 0.15)
+
     const link = g
       .append("g")
       .selectAll<SVGLineElement, d3.SimulationLinkDatum<SimNode>>("line")
       .data(simLinks)
       .join("line")
-      .attr("stroke", "currentColor")
-      .attr("stroke-opacity", 0.15)
-      .attr("stroke-width", 1)
+      .attr("stroke", (_, i) => `url(#eg-${i})`)
+      .attr("stroke-opacity", 0.4)
+      .attr("stroke-width", 1.5)
 
     const nodeGroup = g
       .append("g")
@@ -140,29 +170,30 @@ export function KnowledgeGraph({
       .join("g")
       .attr("cursor", "pointer")
 
-    nodeGroup
+    const circles = nodeGroup
       .append("circle")
       .attr("r", (d) => getNodeSize(d.degree))
       .attr("fill", (d) => getNodeColor(d.tags))
       .attr("stroke", (d) => {
         if (!highlightTerm) return "none"
         return d.title.toLowerCase().includes(highlightTerm.toLowerCase())
-          ? "#f59e0b"
+          ? "#8b5cf6"
           : "none"
       })
       .attr("stroke-width", (d) => {
         if (!highlightTerm) return 0
         return d.title.toLowerCase().includes(highlightTerm.toLowerCase()) ? 3 : 0
       })
+      .attr("transition", "filter 0.15s ease")
 
-    nodeGroup
+    const labels = nodeGroup
       .append("text")
       .text((d) => d.title)
       .attr("font-size", "10px")
       .attr("dx", 8)
       .attr("dy", 3)
       .attr("fill", "currentColor")
-      .attr("opacity", 0.7)
+      .attr("opacity", (d) => d.degree > 2 ? 0.7 : 0)
       .attr("pointer-events", "none")
 
     nodeGroup.call(
@@ -186,6 +217,31 @@ export function KnowledgeGraph({
 
     nodeGroup
       .on("mouseenter", (event, d) => {
+        const connectedIds = new Set([d.id])
+        for (const l of simLinks) {
+          const sId = (l.source as SimNode).id
+          const tId = (l.target as SimNode).id
+          if (sId === d.id) connectedIds.add(tId)
+          if (tId === d.id) connectedIds.add(sId)
+        }
+
+        circles
+          .filter((n) => n.id === d.id)
+          .attr("filter", "url(#node-glow)")
+        circles
+          .filter((n) => n.id !== d.id)
+          .attr("opacity", (n) => connectedIds.has(n.id) ? 1 : 0.2)
+
+        link
+          .attr("stroke-opacity", (l) => {
+            const sId = (l.source as SimNode).id
+            const tId = (l.target as SimNode).id
+            return (sId === d.id || tId === d.id) ? 0.8 : 0.1
+          })
+
+        labels
+          .attr("opacity", (n) => connectedIds.has(n.id) ? 0.7 : 0)
+
         const rect = container.getBoundingClientRect()
         setTooltip({
           visible: true,
@@ -205,6 +261,9 @@ export function KnowledgeGraph({
         }))
       })
       .on("mouseleave", () => {
+        circles.attr("filter", null).attr("opacity", 1)
+        link.attr("stroke-opacity", 0.4)
+        labels.attr("opacity", (d) => d.degree > 2 ? 0.7 : 0)
         setTooltip((prev) => ({ ...prev, visible: false }))
       })
       .on("click", (event, d) => {
@@ -214,6 +273,12 @@ export function KnowledgeGraph({
 
     simulation.on("tick", () => {
       link
+        .attr("x1", (d) => (d.source as SimNode).x!)
+        .attr("y1", (d) => (d.source as SimNode).y!)
+        .attr("x2", (d) => (d.target as SimNode).x!)
+        .attr("y2", (d) => (d.target as SimNode).y!)
+
+      edgeGradients
         .attr("x1", (d) => (d.source as SimNode).x!)
         .attr("y1", (d) => (d.source as SimNode).y!)
         .attr("x2", (d) => (d.target as SimNode).x!)

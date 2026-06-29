@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { toast } from "sonner"
 import {
@@ -16,14 +17,20 @@ import {
   Sun,
   Moon,
   Server,
-  CheckCircle2,
-  XCircle,
-  RefreshCw,
   FileText,
   Link2,
   Clock,
   Wifi,
+  RefreshCw,
+  AlertTriangle,
+  Trash2,
 } from "lucide-react"
+
+function truncateMiddle(path: string, maxLen: number = 40): string {
+  if (path.length <= maxLen) return path
+  const half = Math.floor((maxLen - 3) / 2)
+  return path.slice(0, half) + "..." + path.slice(path.length - half)
+}
 
 export default function SettingsPage() {
   const { settings, setSettings, aiConnected, setAiConnected } = useStore()
@@ -118,6 +125,20 @@ export default function SettingsPage() {
     }
   }
 
+  const handleClearIndex = async () => {
+    try {
+      const res = await fetch("/api/reindex", { method: "POST" })
+      if (res.ok) {
+        toast.success("Index cleared and reindexing started")
+        loadStats()
+      } else {
+        toast.error("Failed to clear index")
+      }
+    } catch {
+      toast.error("Failed to clear index")
+    }
+  }
+
   return (
     <div className="flex h-screen">
       <Sidebar />
@@ -142,12 +163,18 @@ export default function SettingsPage() {
                     value={vaultPath}
                     onChange={(e) => setVaultPath(e.target.value)}
                     placeholder="/path/to/your/vault"
+                    className="font-mono text-sm"
                   />
                   <Button onClick={handleOpenVault} variant="secondary">
                     <FolderOpen className="size-4" />
                     Open
                   </Button>
                 </div>
+                {vaultPath && (
+                  <p className="font-mono text-xs text-muted-foreground">
+                    {truncateMiddle(vaultPath)}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Absolute path to a folder containing .md files
                 </p>
@@ -202,16 +229,21 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Database className="size-4" />
-                <span>Status:</span>
-                {aiConnected ? (
-                  <span className="flex items-center gap-1 text-green-500">
-                    <CheckCircle2 className="size-4" />
+                <Database className="size-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Status:</span>
+                {testingBackend ? (
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <RefreshCw className="size-3.5 animate-spin" />
+                    Testing...
+                  </span>
+                ) : aiConnected ? (
+                  <span className="flex items-center gap-1.5 text-green-500">
+                    <span className="inline-block size-2 animate-pulse rounded-full bg-green-500" />
                     Connected
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-muted-foreground">
-                    <XCircle className="size-4" />
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="inline-block size-2 rounded-full bg-red-500/50" />
                     Disconnected
                   </span>
                 )}
@@ -245,41 +277,65 @@ export default function SettingsPage() {
                 <div className="h-5 w-40 animate-pulse rounded bg-muted" />
               </div>
             ) : stats ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <FileText className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Total notes:</span>
-                  <span className="font-medium">{stats.totalNotes}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Link2 className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Total links:</span>
-                  <span className="font-medium">{stats.totalLinks}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Last reindex:</span>
-                  <span className="font-medium">
-                    {stats.lastReindex
-                      ? new Date(stats.lastReindex).toLocaleString()
-                      : "Never"}
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={loadStats}
-                  className="mt-2"
-                >
-                  <RefreshCw className="mr-1 size-3" />
-                  Refresh Stats
-                </Button>
-              </div>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <FileText className="mx-auto mb-1 size-4 text-muted-foreground" />
+                      <p className="text-lg font-bold tabular-nums">{stats.totalNotes}</p>
+                      <p className="text-[10px] text-muted-foreground">Notes</p>
+                    </div>
+                    <div className="text-center">
+                      <Link2 className="mx-auto mb-1 size-4 text-muted-foreground" />
+                      <p className="text-lg font-bold tabular-nums">{stats.totalLinks}</p>
+                      <p className="text-[10px] text-muted-foreground">Links</p>
+                    </div>
+                    <div className="text-center">
+                      <Clock className="mx-auto mb-1 size-4 text-muted-foreground" />
+                      <p className="text-lg font-bold tabular-nums">
+                        {stats.lastReindex
+                          ? new Date(stats.lastReindex).toLocaleDateString()
+                          : "—"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">Last reindex</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadStats}
+                    >
+                      <RefreshCw className="mr-1 size-3" />
+                      Refresh Stats
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Open a vault to see index statistics.
               </p>
             )}
+          </section>
+
+          <section className="mb-8 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-destructive">
+              <AlertTriangle className="size-4" />
+              Danger Zone
+            </h2>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Clear the search index and reindex from scratch. Your note files
+              will not be affected.
+            </p>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleClearIndex}
+            >
+              <Trash2 className="mr-1.5 size-3.5" />
+              Clear Index
+            </Button>
           </section>
 
           <div className="flex justify-end">

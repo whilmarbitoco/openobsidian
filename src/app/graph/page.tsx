@@ -3,21 +3,13 @@
 import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { KnowledgeGraph } from "@/components/graph/knowledge-graph"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Search, Loader2, RotateCcw } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
+import { Search, RotateCcw, Maximize2, Minimize2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/store/useStore"
 import type { GraphData } from "@/types"
+import { cn } from "@/lib/utils"
 
 export default function GraphPage() {
   const [data, setData] = useState<GraphData | null>(null)
@@ -25,6 +17,7 @@ export default function GraphPage() {
   const [highlightTerm, setHighlightTerm] = useState("")
   const [tagFilter, setTagFilter] = useState<string | null>(null)
   const [allTags, setAllTags] = useState<string[]>([])
+  const [focusMode, setFocusMode] = useState(false)
   const router = useRouter()
   const { settings } = useStore()
 
@@ -60,47 +53,8 @@ export default function GraphPage() {
 
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      {!focusMode && <Sidebar />}
       <main className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-border px-4 py-2">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={highlightTerm}
-              onChange={(e) => setHighlightTerm(e.target.value)}
-              placeholder="Highlight nodes..."
-              className="h-8 pl-8 text-xs"
-            />
-          </div>
-          <Select
-            value={tagFilter ?? "all"}
-            onValueChange={(v) => setTagFilter(v === "all" ? null : v)}
-          >
-            <SelectTrigger className="h-8 w-[140px] text-xs">
-              <SelectValue placeholder="Filter by tag" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" className="text-xs">
-                All tags
-              </SelectItem>
-              {allTags.map((tag) => (
-                <SelectItem key={tag} value={tag} className="text-xs">
-                  #{tag}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs"
-            onClick={loadGraph}
-          >
-            <RotateCcw className="mr-1 size-3" />
-            Refresh
-          </Button>
-        </div>
-
         {loading ? (
           <div className="flex flex-1 items-center justify-center p-8">
             <div className="w-full max-w-3xl space-y-4">
@@ -115,16 +69,20 @@ export default function GraphPage() {
             </div>
           </div>
         ) : !data || data.nodes.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
-            <Search className="size-12" />
-            <p className="text-lg font-medium">No graph data</p>
-            <p className="text-sm">
-              Create notes with [[wikilinks]] and #tags to see your knowledge
-              graph.
-            </p>
+          <div className="flex flex-1 items-center justify-center">
+            <EmptyState
+              icon={Search}
+              title="No graph data"
+              description="Create notes with [[wikilinks]] and #tags to see your knowledge graph."
+              actionLabel="Create a note"
+              actionHref="/dashboard"
+            />
           </div>
         ) : (
-          <div className="flex-1">
+          <div className={cn(
+            "relative flex-1 overflow-hidden",
+            focusMode && "after:pointer-events-none after:absolute after:inset-0 after:shadow-[inset_0_0_120px_rgba(0,0,0,0.6)] after:z-20"
+          )}>
             <KnowledgeGraph
               nodes={data.nodes}
               edges={data.edges}
@@ -132,9 +90,74 @@ export default function GraphPage() {
               highlightTerm={highlightTerm || undefined}
               tagFilter={tagFilter}
             />
+
+            <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-full border border-border bg-surface-elevated/90 px-3 py-1.5 shadow-elevated backdrop-blur-sm">
+              <Search className="size-3.5 shrink-0 text-muted-foreground" />
+              <input
+                value={highlightTerm}
+                onChange={(e) => setHighlightTerm(e.target.value)}
+                placeholder="Search nodes..."
+                className="h-6 w-28 bg-transparent text-xs outline-none placeholder:text-muted-foreground/50 md:w-36"
+              />
+              <span className="h-4 w-px bg-border" />
+              <select
+                value={tagFilter ?? "all"}
+                onChange={(e) => setTagFilter(e.target.value === "all" ? null : e.target.value)}
+                className="h-6 max-w-[100px] bg-transparent text-xs outline-none"
+              >
+                <option value="all">All tags</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    #{tag}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={loadGraph}
+                className="ml-0.5 rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground"
+                title="Reset view"
+              >
+                <RotateCcw className="size-3" />
+              </button>
+            </div>
+
+            <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-border bg-surface-elevated/90 px-3 py-2 shadow-elevated backdrop-blur-sm">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="tabular-nums">{data.nodes.length} nodes</span>
+                <span className="tabular-nums">{data.edges.length} edges</span>
+                {allTags.map((tag) => (
+                  <span key={tag} className="flex items-center gap-1">
+                    <span
+                      className="inline-block size-2 rounded-full"
+                      style={{ backgroundColor: getTagColor(tag) }}
+                    />
+                    <span>{tag}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setFocusMode(!focusMode)}
+              className="absolute right-4 top-4 z-10 rounded-full border border-border bg-surface-elevated/90 p-2 shadow-elevated backdrop-blur-sm text-muted-foreground transition-colors hover:text-foreground"
+              title={focusMode ? "Exit focus mode" : "Focus mode"}
+            >
+              {focusMode ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+            </button>
           </div>
         )}
       </main>
     </div>
   )
+}
+
+function getTagColor(tag: string): string {
+  const COLORS: Record<string, string> = {
+    project: "#8b5cf6",
+    idea: "#10b981",
+    person: "#ec4899",
+    topic: "#3b82f6",
+    reference: "#8b5cf6",
+  }
+  return COLORS[tag] || "#6366f1"
 }

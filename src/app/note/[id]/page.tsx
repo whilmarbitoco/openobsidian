@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback, useRef, Fragment } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useStore } from "@/store/useStore"
 import { Sidebar } from "@/components/sidebar"
@@ -12,12 +12,15 @@ import { toast } from "sonner"
 import {
   ArrowLeft,
   Save,
-  Eye,
-  Edit3,
   Hash,
   Trash2,
+  Plus,
+  GripVertical,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import type { Note } from "@/types"
+import { cn } from "@/lib/utils"
 
 export default function NotePage() {
   const params = useParams()
@@ -25,11 +28,14 @@ export default function NotePage() {
   const { settings } = useStore()
   const [note, setNote] = useState<Note | null>(null)
   const [content, setContent] = useState("")
-  const [isPreview, setIsPreview] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
   const autoSaveRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [autoSaving, setAutoSaving] = useState(false)
+  const [previewCollapsed, setPreviewCollapsed] = useState(false)
+  const [splitRatio, setSplitRatio] = useState(0.5)
+  const [isDragging, setIsDragging] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const notePath = params.id ? decodeURIComponent(params.id as string) : ""
 
@@ -127,6 +133,32 @@ export default function NotePage() {
     setHasChanges(true)
   }
 
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isDragging) return
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      setSplitRatio(
+        Math.max(0.2, Math.min(0.8, (e.clientX - rect.left) / rect.width))
+      )
+    }
+    const handleMouseUp = () => setIsDragging(false)
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [isDragging])
+
+  const wordCount = content.split(/\s+/).filter(Boolean).length
+  const breadcrumbParts = notePath.replace(/\.md$/, "").split("/")
+
   if (!note) {
     return (
       <div className="flex h-screen">
@@ -142,88 +174,145 @@ export default function NotePage() {
     <div className="flex h-screen">
       <Sidebar />
       <main className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-2 border-b border-border px-4 py-2">
+        <header className="flex items-center gap-3 border-b border-border px-4 py-2">
           <Button
             variant="ghost"
             size="icon"
-            className="size-8"
+            className="size-8 shrink-0"
             onClick={() => router.push("/dashboard")}
           >
             <ArrowLeft className="size-4" />
           </Button>
-          <div className="flex-1 min-w-0">
-            <h2 className="truncate text-sm font-medium">{note.title}</h2>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              {note.tags.length > 0 ? (
-                note.tags.map((tag) => (
-                  <span key={tag} className="flex items-center gap-1">
-                    <Hash className="size-3" />
-                    {tag}
+
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span>vault</span>
+              {breadcrumbParts.map((part, i) => (
+                <Fragment key={i}>
+                  <span className="text-muted-foreground/40">/</span>
+                  <span
+                    className={cn(
+                      i === breadcrumbParts.length - 1 && "font-medium text-foreground"
+                    )}
+                  >
+                    {part}
                   </span>
-                ))
-              ) : (
-                <span>No tags</span>
-              )}
+                </Fragment>
+              ))}
             </div>
+            <span className="truncate text-sm font-medium">{note.title}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant={isPreview ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setIsPreview(true)}
-            >
-              <Eye className="size-4" />
-              Preview
-            </Button>
-            <Button
-              variant={!isPreview ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setIsPreview(false)}
-            >
-              <Edit3 className="size-4" />
-              Edit
-            </Button>
-            <Separator orientation="vertical" className="mx-1 h-6" />
-            {autoSaving && (
-              <span className="text-xs text-muted-foreground">Auto-saving...</span>
+
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{wordCount} words</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {isSaving || autoSaving ? (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="inline-block size-2 animate-pulse rounded-full bg-yellow-500" />
+                Saving...
+              </span>
+            ) : hasChanges ? (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="inline-block size-2 rounded-full bg-yellow-500" />
+                Unsaved
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-xs text-green-400">
+                <span className="inline-block size-2 rounded-full bg-green-500" />
+                Saved
+              </span>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 text-destructive hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="size-4" />
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isSaving || !hasChanges}
-            >
-              <Save className="size-4" />
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
           </div>
+
+          <Separator orientation="vertical" className="mx-1 h-6" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 shrink-0 text-destructive hover:text-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving || !hasChanges}
+          >
+            <Save className="size-4" />
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
         </header>
 
-        <div className="flex flex-1 overflow-hidden">
-          {isPreview ? (
-            <div className="flex-1 overflow-hidden">
-              <MarkdownPreview content={content} />
+        {note.tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-1.5">
+            {note.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-0.5 text-xs text-primary"
+              >
+                <Hash className="size-3" />
+                {tag}
+              </span>
+            ))}
+            <button className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent-soft hover:text-primary">
+              <Plus className="size-3" />
+              Add tag
+            </button>
+          </div>
+        )}
+
+        <div ref={containerRef} className="flex flex-1 overflow-hidden">
+          <div
+            className="overflow-hidden"
+            style={{
+              flex: previewCollapsed ? "1 1 100%" : `0 0 ${splitRatio * 100}%`,
+              minWidth: 0,
+            }}
+          >
+            <MarkdownEditor
+              value={content}
+              onChange={handleContentChange}
+              onSave={handleSave}
+            />
+          </div>
+
+          {!previewCollapsed && (
+            <div
+              className={cn(
+                "relative flex w-2 shrink-0 cursor-col-resize items-center justify-center bg-transparent transition-colors hover:bg-accent/20",
+                isDragging && "bg-accent/30"
+              )}
+              onMouseDown={handleDividerMouseDown}
+            >
+              <div className="flex h-8 items-center rounded-full bg-border px-0.5">
+                <GripVertical className="size-3 text-muted-foreground" />
+              </div>
+              <button
+                className="absolute -right-3 top-2 z-10 flex size-5 items-center justify-center rounded-full border border-border bg-surface-elevated text-muted-foreground transition-colors hover:text-primary"
+                onClick={() => setPreviewCollapsed(true)}
+                title="Hide preview"
+              >
+                <ChevronRight className="size-3" />
+              </button>
             </div>
-          ) : (
-            <div className="flex flex-1">
-              <div className="flex-1 p-4">
-                <MarkdownEditor
-                  value={content}
-                  onChange={handleContentChange}
-                  onSave={handleSave}
-                />
-              </div>
-              <Separator orientation="vertical" />
-              <div className="flex-1 overflow-hidden">
-                <MarkdownPreview content={content} />
-              </div>
+          )}
+
+          {previewCollapsed && (
+            <button
+              className="flex w-6 shrink-0 items-center justify-center border-l border-border bg-transparent text-muted-foreground transition-colors hover:bg-accent/20"
+              onClick={() => setPreviewCollapsed(false)}
+              title="Show preview"
+            >
+              <ChevronLeft className="size-3" />
+            </button>
+          )}
+
+          {!previewCollapsed && (
+            <div className="flex flex-1 overflow-hidden">
+              <MarkdownPreview content={content} />
             </div>
           )}
         </div>

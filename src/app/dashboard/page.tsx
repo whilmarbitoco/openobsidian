@@ -1,25 +1,43 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useStore } from "@/store/useStore"
-import { listVault, createNote } from "@/lib/vault"
+import { createNote } from "@/lib/vault"
 import { Sidebar } from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import {
-  FileText,
-  Plus,
-  Clock,
-  Tags,
-  Hash,
-  ExternalLink,
-} from "lucide-react"
+import { FileText, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { Note } from "@/types"
 
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return "Good morning"
+  if (hour < 17) return "Good afternoon"
+  return "Good evening"
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d`
+  return `${Math.floor(days / 30)}mo`
+}
+
+function getPreview(content: string): string {
+  return content
+    .split("\n")
+    .filter((line) => line.trim())
+    .slice(0, 2)
+    .join("\n")
+}
+
 export default function DashboardPage() {
-  const { settings, vaultStructure, setVaultStructure } = useStore()
+  const { settings } = useStore()
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -57,104 +75,116 @@ export default function DashboardPage() {
     }
   }
 
-  const sortedNotes = [...notes].sort(
-    (a, b) =>
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  const sortedNotes = useMemo(
+    () =>
+      [...notes].sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      ),
+    [notes]
   )
 
   const recentNotes = sortedNotes.slice(0, 10)
   const untaggedNotes = notes.filter((n) => n.tags.length === 0)
   const orphanNotes = notes.filter((n) => n.links.length === 0)
+  const greeting = getGreeting()
+  const mostRecentTime =
+    notes.length > 0 ? timeAgo(sortedNotes[0].updatedAt) : null
 
   return (
     <div className="flex h-screen">
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <div className="mx-auto max-w-4xl p-6">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
-                {settings.vaultPath || "No vault open"}
+              <h1 className="text-2xl font-bold tracking-tight">{greeting}</h1>
+              <p className="mt-1 font-mono text-xs text-muted-foreground tabular-nums">
+                ↓ {notes.length} notes
+                {untaggedNotes.length > 0 &&
+                  ` · ${untaggedNotes.length} untagged`}
+                {orphanNotes.length > 0 && ` · ${orphanNotes.length} orphan`}
+                {mostRecentTime && ` · updated ${mostRecentTime} ago`}
               </p>
             </div>
-            <Button onClick={handleNewNote}>
+            <Button onClick={handleNewNote} className="gap-2">
               <Plus className="size-4" />
               New Note
+              <span className="ml-1 rounded border border-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-mono opacity-60">
+                ⌘N
+              </span>
             </Button>
           </div>
 
-          <div className="mb-6 grid grid-cols-3 gap-4">
-            <div className="rounded-lg border border-border bg-card p-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <FileText className="size-4" />
-                Total Notes
-              </div>
-              <p className="text-2xl font-bold">{notes.length}</p>
+          {loading ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Loading notes...
             </div>
-            <div className="rounded-lg border border-border bg-card p-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <Hash className="size-4" />
-                Untagged
-              </div>
-              <p className="text-2xl font-bold">{untaggedNotes.length}</p>
+          ) : !settings.vaultPath ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+              <FileText className="size-12 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                No vault open. Configure your vault path in Settings to get
+                started.
+              </p>
             </div>
-            <div className="rounded-lg border border-border bg-card p-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <ExternalLink className="size-4" />
-                Orphans
-              </div>
-              <p className="text-2xl font-bold">{orphanNotes.length}</p>
+          ) : recentNotes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+              <FileText className="size-12 text-muted-foreground/40" />
+              <p className="text-base font-medium">Your vault is quiet</p>
+              <p className="text-sm text-muted-foreground">
+                Let&apos;s change that →
+              </p>
+              <Button onClick={handleNewNote}>
+                <Plus className="size-4" />
+                New Note
+              </Button>
             </div>
-          </div>
-
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Clock className="size-4 text-muted-foreground" />
-              <h2 className="text-lg font-semibold">Recent Notes</h2>
-            </div>
-            <Separator className="mb-4" />
-            {loading ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">
-                Loading notes...
-              </div>
-            ) : recentNotes.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">
-                {settings.vaultPath
-                  ? "No notes yet. Create your first note!"
-                  : "Open a vault in Settings to get started."}
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {recentNotes.map((note) => (
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {recentNotes.map((note) => {
+                const preview = getPreview(note.content)
+                return (
                   <button
                     key={note.path}
                     onClick={() =>
-                      router.push(
-                        `/note/${encodeURIComponent(note.path)}`
-                      )
+                      router.push(`/note/${encodeURIComponent(note.path)}`)
                     }
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                    className="group flex flex-col items-start gap-2 rounded-[var(--radius-card)] border border-border bg-card p-4 text-left shadow-elevated transition-all duration-150 hover:translate-y-[-2px] hover:shadow-lg hover:bg-accent/50"
                   >
-                    <FileText className="size-4 shrink-0 text-muted-foreground" />
-                    <div className="min-w-0 flex-1">
+                    <div className="flex w-full items-start justify-between gap-2">
                       <p className="truncate text-sm font-medium">
-                        {note.title}
+                        {note.title || "Untitled"}
                       </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {note.tags.length > 0
-                          ? note.tags.map((t) => `#${t}`).join(" ")
-                          : "No tags"}
-                      </p>
+                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                        {new Date(note.updatedAt).toLocaleDateString()}
+                      </span>
                     </div>
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                      {new Date(note.updatedAt).toLocaleDateString()}
-                    </span>
+                    {preview && (
+                      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        {preview}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {note.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="font-mono text-[10px] text-muted-foreground/70"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                      {note.tags.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground/50">
+                          +{note.tags.length - 3}
+                        </span>
+                      )}
+                    </div>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </main>
     </div>

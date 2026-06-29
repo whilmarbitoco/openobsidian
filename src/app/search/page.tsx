@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Search, FileText, Loader2, X } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
+import { Search, FileText, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/store/useStore"
 import type { SearchResult } from "@/types"
@@ -59,15 +59,15 @@ export default function SearchPage() {
     <div className="flex h-screen">
       <Sidebar />
       <main className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-b border-border p-4">
-          <div className="relative mx-auto max-w-2xl">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search notes... (press Esc to clear)"
-              className="pl-9 pr-9"
+              placeholder="Start typing to search your vault..."
+              className="h-12 pl-11 pr-10 text-lg ring-violet-500/30 focus-visible:ring-2"
               autoFocus
             />
             {query && (
@@ -75,39 +75,35 @@ export default function SearchPage() {
                 onClick={() => { setQuery(""); setResults([]); setSearched(false) }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                <X className="size-4" />
+                <X className="size-5" />
               </button>
             )}
           </div>
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="mx-auto max-w-2xl p-4">
+          <div className="mx-auto max-w-2xl px-4 pb-8">
             {loading ? (
-              <div className="space-y-2 py-4">
+              <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Skeleton key={i} className="h-24 w-full rounded-lg" />
                 ))}
               </div>
             ) : !searched ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                <Search className="mb-3 size-12" />
-                <p className="text-lg font-medium">Search your notes</p>
-                <p className="mt-1 text-sm">
-                  Type a query above to search across all your notes.
-                </p>
-              </div>
+              <EmptyState
+                icon={Search}
+                title="Search your vault"
+                description="Start typing to search across all your notes."
+              />
             ) : results.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                <FileText className="mb-3 size-12" />
-                <p className="text-lg font-medium">No results found</p>
-                <p className="mt-1 text-sm">
-                  Try different keywords or check your spelling.
-                </p>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="No results found"
+                description="Try different keywords or check your spelling."
+              />
             ) : (
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">
+                <p className="mb-3 text-xs text-muted-foreground">
                   {results.length} result{results.length !== 1 ? "s" : ""}
                 </p>
                 {results.map((result) => (
@@ -116,7 +112,7 @@ export default function SearchPage() {
                     onClick={() =>
                       router.push(`/note/${encodeURIComponent(result.path)}`)
                     }
-                    className="w-full rounded-lg border border-border bg-card p-4 text-left transition-colors hover:bg-accent hover:text-accent-foreground"
+                    className="w-full rounded-lg border border-border bg-card p-4 text-left transition-all duration-150 hover:border-primary/30 hover:bg-accent/50 hover:shadow-elevated"
                   >
                     <h3 className="mb-1 text-sm font-medium">{result.title}</h3>
                     <p

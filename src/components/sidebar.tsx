@@ -16,13 +16,16 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
 import { checkEngineHealth } from "@/lib/ai"
+import { cn } from "@/lib/utils"
 
 export function Sidebar() {
   const { sidebarOpen, setSidebarOpen, aiConnected, setAiConnected } =
     useStore()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const check = async () => {
@@ -49,11 +52,19 @@ export function Sidebar() {
 
   const visible = isMobile ? mobileOpen : sidebarOpen
 
+  const navItems = [
+    { href: "/dashboard", label: "Dashboard", icon: Activity },
+    { href: "/insights", label: "Insights", icon: Lightbulb },
+    { href: "/search", label: "Search", icon: Search },
+  ] as const
+
   const sidebarContent = (
     <>
       {isMobile && (
         <div className="flex items-center justify-between border-b border-border p-3">
-          <span className="text-sm font-semibold">OpenObsidian</span>
+          <span className="text-lg font-semibold tracking-tight">
+            &#x25C7; OpenObsidian
+          </span>
           <Button
             variant="ghost"
             size="icon"
@@ -65,69 +76,82 @@ export function Sidebar() {
         </div>
       )}
       <div className="flex items-center justify-between p-2">
-        <div className="flex items-center gap-2 px-2">
-          <span className="text-sm font-semibold text-sidebar-foreground">
-            OpenObsidian
-          </span>
-          <span
-            className={`inline-block size-2 rounded-full ${
-              aiConnected ? "bg-green-500" : "bg-red-500"
-            }`}
-            title={aiConnected ? "AI Backend Connected" : "AI Backend Disconnected"}
-          />
-        </div>
-        {!isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => setSidebarOpen(false)}
+        <span className="px-2 text-lg font-semibold tracking-tight">
+          &#x25C7; OpenObsidian
+        </span>
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-2 py-0.5",
+              aiConnected
+                ? "border-green-500/30 text-green-400"
+                : "border-red-500/30 text-red-400"
+            )}
+            title={
+              aiConnected
+                ? "AI Backend Connected"
+                : "AI Backend Disconnected"
+            }
           >
-            <PanelLeftClose className="size-4" />
-          </Button>
-        )}
+            <span
+              className={cn(
+                "inline-block size-2 rounded-full",
+                aiConnected ? "bg-green-500" : "bg-red-500"
+              )}
+            />
+            <span className="text-[10px] font-medium">
+              {aiConnected ? "DCMA" : "Offline"}
+            </span>
+          </div>
+          {!isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <PanelLeftClose className="size-4" />
+            </Button>
+          )}
+        </div>
       </div>
       <Separator />
       <div className="flex-1 overflow-hidden">
         <FileTree />
       </div>
       <Separator />
-      <div className="flex flex-col gap-1 p-2">
-        <Link href="/dashboard">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start gap-2"
-          >
-            <Activity className="size-4" />
-            <span>Dashboard</span>
-          </Button>
-        </Link>
-        <Link href="/insights">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start gap-2"
-          >
-            <Lightbulb className="size-4" />
-            <span>Insights</span>
-          </Button>
-        </Link>
+      <div className="flex flex-col gap-0.5 p-2">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href
+          return (
+            <Link key={href} href={href}>
+              <div
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                  isActive
+                    ? "border-l-2 border-primary bg-accent-soft"
+                    : "border-l-2 border-transparent hover:bg-accent/50"
+                )}
+              >
+                <Icon className="size-4 text-muted-foreground" />
+                <span>{label}</span>
+              </div>
+            </Link>
+          )
+        })}
         <div className="flex items-center gap-1">
-          <Link href="/search" className="flex-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2"
+          <Link href="/settings" className="flex-1">
+            <div
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                pathname === "/settings"
+                  ? "border-l-2 border-primary bg-accent-soft"
+                  : "border-l-2 border-transparent hover:bg-accent/50"
+              )}
             >
-              <Search className="size-4" />
-              <span>Search</span>
-            </Button>
-          </Link>
-          <Link href="/settings">
-            <Button variant="ghost" size="icon" className="size-8">
-              <Settings className="size-4" />
-            </Button>
+              <Settings className="size-4 text-muted-foreground" />
+              <span>Settings</span>
+            </div>
           </Link>
         </div>
       </div>
@@ -146,13 +170,16 @@ export function Sidebar() {
           >
             <Menu className="size-4" />
           </Button>
-          <span className="text-sm font-semibold">OpenObsidian</span>
+          <span className="text-lg font-semibold tracking-tight">
+            &#x25C7; OpenObsidian
+          </span>
           <div className="flex-1" />
           <div className="relative">
             <span
-              className={`absolute -right-0.5 -top-0.5 size-2 rounded-full border-2 border-sidebar-background ${
+              className={cn(
+                "absolute -right-0.5 -top-0.5 size-2 rounded-full border-2 border-sidebar-background",
                 aiConnected ? "bg-green-500" : "bg-red-500"
-              }`}
+              )}
             />
             <Link href="/settings">
               <Button variant="ghost" size="icon" className="size-8">
@@ -206,9 +233,10 @@ export function Sidebar() {
         <div className="flex-1" />
         <div className="relative">
           <span
-            className={`absolute -right-0.5 -top-0.5 size-2 rounded-full border-2 border-sidebar-background ${
+            className={cn(
+              "absolute -right-0.5 -top-0.5 size-2 rounded-full border-2 border-sidebar-background",
               aiConnected ? "bg-green-500" : "bg-red-500"
-            }`}
+            )}
           />
           <Link href="/settings">
             <Button variant="ghost" size="icon" className="size-8">

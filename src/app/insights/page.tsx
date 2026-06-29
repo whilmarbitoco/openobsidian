@@ -5,9 +5,11 @@ import { Sidebar } from "@/components/sidebar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent } from "@/components/ui/card"
 import { useStore } from "@/store/useStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { EmptyState } from "@/components/empty-state"
 import {
   Clock,
   Hash,
@@ -19,6 +21,7 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  ArrowRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Note } from "@/types"
@@ -171,9 +174,11 @@ export default function InsightsPage() {
                 </div>
               ) : recentNotes.length === 0 ? (
                 <EmptyState
-                  icon={<FileText className="size-8" />}
+                  icon={FileText}
                   title="No notes yet"
                   description="Open a vault in Settings to get started."
+                  actionLabel="Open Settings"
+                  actionHref="/settings"
                 />
               ) : (
                 <div className="space-y-1">
@@ -214,29 +219,22 @@ export default function InsightsPage() {
                 <Skeleton className="h-24 w-full" />
               ) : untaggedNotes.length === 0 ? (
                 <EmptyState
-                  icon={<Hash className="size-8" />}
+                  icon={Hash}
                   title="All notes tagged"
                   description="Every note has at least one tag. Great organization!"
                 />
               ) : (
-                <div className="space-y-1">
+                <div className="flex flex-wrap gap-1.5">
                   {untaggedNotes.map((note) => (
                     <button
                       key={note.path}
                       onClick={() =>
                         router.push(`/note/${encodeURIComponent(note.path)}`)
                       }
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs hover:bg-accent transition-colors"
                     >
-                      <FileText className="size-4 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {note.title}
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px]">
-                        Add tags
-                      </Badge>
+                      <FileText className="size-3 shrink-0" />
+                      {note.title}
                     </button>
                   ))}
                 </div>
@@ -252,26 +250,22 @@ export default function InsightsPage() {
                 <Skeleton className="h-24 w-full" />
               ) : orphanNotes.length === 0 ? (
                 <EmptyState
-                  icon={<Link2 className="size-8" />}
+                  icon={Link2}
                   title="No orphans"
                   description="All your notes are connected via wikilinks."
                 />
               ) : (
-                <div className="space-y-1">
+                <div className="flex flex-wrap gap-1.5">
                   {orphanNotes.map((note) => (
                     <button
                       key={note.path}
                       onClick={() =>
                         router.push(`/note/${encodeURIComponent(note.path)}`)
                       }
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs hover:bg-accent transition-colors"
                     >
-                      <FileText className="size-4 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {note.title}
-                        </p>
-                      </div>
+                      <FileText className="size-3 shrink-0" />
+                      {note.title}
                     </button>
                   ))}
                 </div>
@@ -292,30 +286,29 @@ export default function InsightsPage() {
                     </div>
                   ) : linkSuggestions.length === 0 ? (
                     <EmptyState
-                      icon={<Lightbulb className="size-8" />}
+                      icon={Lightbulb}
                       title="No suggestions"
                       description="The AI will suggest links as you add more notes."
                     />
                   ) : (
                     <div className="space-y-2">
                       {linkSuggestions.map((s) => (
-                        <div
-                          key={s.id}
-                          className="rounded-lg border border-border bg-card p-3"
-                        >
-                          <div className="mb-1 flex items-center gap-2 text-sm">
-                            <span className="font-medium">
-                              {s.noteA}
-                            </span>
-                            <span className="text-muted-foreground">→</span>
-                            <span className="font-medium">
-                              {s.noteB}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {s.reason}
-                          </p>
-                        </div>
+                        <Card key={s.id}>
+                          <CardContent className="p-3">
+                            <div className="mb-1.5 flex items-center gap-2 text-sm">
+                              <span className="font-mono text-xs font-medium">
+                                {s.noteA}
+                              </span>
+                              <ArrowRight className="size-3 text-muted-foreground shrink-0" />
+                              <span className="font-mono text-xs font-medium">
+                                {s.noteB}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {s.reason}
+                            </p>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   )}
@@ -333,45 +326,47 @@ export default function InsightsPage() {
                     </div>
                   ) : insightConflicts.length === 0 ? (
                     <EmptyState
-                      icon={<AlertTriangle className="size-8" />}
+                      icon={AlertTriangle}
                       title="No conflicts found"
                       description="Your knowledge base is consistent."
                     />
                   ) : (
                     <div className="space-y-3">
                       {insightConflicts.map((c) => (
-                        <div
-                          key={c.id}
-                          className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3"
-                        >
-                          <div className="mb-2 grid grid-cols-2 gap-3">
-                            <div className="rounded-md bg-card p-2 text-xs">
-                              <p className="mb-1 font-medium text-amber-400">
-                                Note A
-                              </p>
-                              <p className="text-muted-foreground">
-                                {c.noteA}
-                              </p>
+                        <Card key={c.id} className="border-amber-500/20">
+                          <CardContent className="p-3">
+                            <div className="relative mb-2 flex items-center gap-3">
+                              <div className="flex-1 rounded-md bg-card p-2 text-xs">
+                                <p className="mb-1 font-medium text-amber-400">
+                                  Note A
+                                </p>
+                                <p className="font-mono text-muted-foreground">
+                                  {c.noteA}
+                                </p>
+                              </div>
+                              <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 text-xs font-medium text-amber-400">
+                                vs
+                              </div>
+                              <div className="flex-1 rounded-md bg-card p-2 text-xs">
+                                <p className="mb-1 font-medium text-amber-400">
+                                  Note B
+                                </p>
+                                <p className="font-mono text-muted-foreground">
+                                  {c.noteB}
+                                </p>
+                              </div>
                             </div>
-                            <div className="rounded-md bg-card p-2 text-xs">
-                              <p className="mb-1 font-medium text-amber-400">
-                                Note B
-                              </p>
-                              <p className="text-muted-foreground">
-                                {c.noteB}
-                              </p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>
+                                {c.description}
+                              </span>
+                              <span>
+                                Detected{" "}
+                                {new Date(c.detectedAt).toLocaleDateString()}
+                              </span>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>
-                              {c.description}
-                            </span>
-                            <span>
-                              Detected{" "}
-                              {new Date(c.detectedAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   )}
@@ -382,24 +377,26 @@ export default function InsightsPage() {
                 icon={<WifiOff className="size-4" />}
                 title="AI-Powered Insights"
               >
-                <div className="rounded-lg border border-border bg-card p-6 text-center">
-                  <WifiOff className="mx-auto mb-3 size-8 text-muted-foreground/50" />
-                  <p className="mb-1 text-sm font-medium">
-                    AI backend is not connected
-                  </p>
-                  <p className="mb-4 text-xs text-muted-foreground">
-                    Start the AI backend to enable insights
-                    including suggested links and conflict detection.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push("/settings")}
-                  >
-                    <Wifi className="size-4" />
-                    Configure
-                  </Button>
-                </div>
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <WifiOff className="mx-auto mb-3 size-8 text-muted-foreground/50" />
+                    <p className="mb-1 text-sm font-medium">
+                      AI backend is not connected
+                    </p>
+                    <p className="mb-4 text-xs text-muted-foreground">
+                      Start the AI backend to enable insights
+                      including suggested links and conflict detection.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push("/settings")}
+                    >
+                      <Wifi className="size-4" />
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
               </Section>
             ) : null}
           </div>
@@ -433,25 +430,5 @@ function Section({
       </div>
       {children}
     </section>
-  )
-}
-
-function EmptyState({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode
-  title: string
-  description: string
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-8 text-center">
-      <span className="mb-3 text-muted-foreground/50">{icon}</span>
-      <p className="mb-1 text-sm font-medium text-muted-foreground">{title}</p>
-      <p className="max-w-sm text-xs text-muted-foreground/60">
-        {description}
-      </p>
-    </div>
   )
 }
