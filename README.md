@@ -1,18 +1,18 @@
 # OpenObsidian
 
-> Local-first knowledge management powered by an AI backend.
+> Local-first knowledge management powered by DCMA cognitive engine.
 
-OpenObsidian isn't just a notes app — it's a thinking tool. Your notes are indexed, connected, and analyzed by a local AI backend that detects relationships, conflicts, and patterns in your knowledge over time.
+OpenObsidian isn't just a notes app — it's a thinking tool. Your notes are indexed, connected, and reasoned about by **DCMA** — a graph cognition engine that detects relationships, contradictions, and patterns in your knowledge over time.
 
 ## Features
 
 - **Markdown-native** — plain .md files, your data is portable
 - **Full-text + semantic search** — find anything instantly
-- **Knowledge graph** — interactive visualization of your ideas
-- **AI insights** — conflict detection, link suggestions
-- **Knowledge chat** — ask questions, get cited answers from your notes
+- **Knowledge graph** — powered by DCMA, interactive visualization of your connected ideas
+- **AI insights** — DCMA detects conflicts, suggests links, surfaces forgotten knowledge
+- **Knowledge chat** — DCMA answers questions from your notes with source citations
 - **Dark-first design** — built for long writing sessions
-- **Local-first** — no cloud accounts, no tracking, no servers
+- **Local-first** — no cloud accounts, no tracking, no servers. DCMA runs on your machine
 - **Keyboard-driven** — Cmd+K search, Cmd+N new note, navigation without mouse
 
 ## Quick Start
@@ -25,25 +25,29 @@ npm run dev
 
 Set your vault path in Settings to a folder containing .md files.
 
-## AI Backend Setup
+## Powered by DCMA
 
 OpenObsidian works standalone with full-text search and knowledge graph visualization.
-To enable AI-powered insights (conflict detection, link suggestions, semantic chat), you need an AI backend.
+To unlock the full cognitive layer — conflict detection, link suggestions, semantic chat — you need **DCMA**.
 
-The backend processes your notes through a graph cognition pipeline:
-- Builds a knowledge graph of entities and relationships extracted from your writing
-- Detects when new notes conflict with or contradict earlier ones
-- Surfaces forgotten connections relevant to what you're thinking about now
-- Enables natural-language chat grounded in your own notes with source citations
+**DCMA** is a private, proprietary cognitive reasoning engine built for understanding knowledge as a living graph. It was built by [Whilmar Bitoco](https://github.com/whilmarbitoco) as the intelligence layer behind OpenObsidian.
 
-Works entirely locally — your notes never leave your machine.
+What DCMA does:
+- Extracts entities and relationships from your notes, building a living knowledge graph
+- Detects contradictions — when something you wrote today conflicts with a note from months ago
+- Surfaces forgotten connections relevant to what you're currently thinking about
+- Enables natural-language chat grounded in your own notes, with source citations
 
-Set its URL in Settings (default: `http://localhost:8080`).
+DCMA runs entirely on your machine. Your data never leaves your device.
+
+To set it up, run DCMA locally and set its URL in OpenObsidian Settings (default: `http://localhost:3030`).
 
 ## Architecture
 
 ```
-Browser → OpenObsidian (Next.js) → AI Backend
+Browser → OpenObsidian (Next.js) → DCMA (cognitive engine)
                      ↓
               SQLite (search index)
 ```
+
+DCMA is closed-source and proprietary. OpenObsidian is its public-facing product.
