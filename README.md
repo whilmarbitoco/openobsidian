@@ -27,8 +27,18 @@ Set your vault path in Settings to a folder containing .md files.
 
 ## AI Backend Setup
 
-OpenObsidian works standalone with full-text search.
-To enable AI insights, run the AI backend and set its URL in Settings.
+OpenObsidian works standalone with full-text search and knowledge graph visualization.
+To enable AI-powered insights (conflict detection, link suggestions, semantic chat), you need an AI backend.
+
+The backend processes your notes through a graph cognition pipeline:
+- Builds a knowledge graph of entities and relationships extracted from your writing
+- Detects when new notes conflict with or contradict earlier ones
+- Surfaces forgotten connections relevant to what you're thinking about now
+- Enables natural-language chat grounded in your own notes with source citations
+
+Works entirely locally — your notes never leave your machine.
+
+Set its URL in Settings (default: `http://localhost:8080`).
 
 ## Architecture
 
