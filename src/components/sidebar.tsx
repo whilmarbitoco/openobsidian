@@ -12,7 +12,6 @@ import {
   Activity,
   Lightbulb,
   Menu,
-  X,
 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -60,46 +59,26 @@ export function Sidebar() {
 
   const sidebarContent = (
     <>
-      {isMobile && (
-        <div className="flex items-center justify-between border-b border-border p-3">
-          <span className="text-lg font-semibold tracking-tight">
-            &#x25C7; OpenObsidian
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => setMobileOpen(false)}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-      )}
-      <div className="flex items-center justify-between p-2">
-        <span className="px-2 text-lg font-semibold tracking-tight">
+      <div className="flex items-center justify-between px-3 py-3">
+        <span className="text-[15px] font-semibold tracking-tight text-foreground">
           &#x25C7; OpenObsidian
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <div
-            className={cn(
-              "flex items-center gap-1.5 rounded-full border px-2 py-0.5",
-              aiConnected
-                ? "border-green-500/30 text-green-400"
-                : "border-red-500/30 text-red-400"
-            )}
+            className="flex items-center gap-1.5"
             title={
               aiConnected
-                ? "AI Backend Connected"
-                : "AI Backend Disconnected"
+                ? "DCMA Connected"
+                : "DCMA Disconnected"
             }
           >
             <span
               className={cn(
-                "inline-block size-2 rounded-full",
-                aiConnected ? "bg-green-500" : "bg-red-500"
+                "inline-block size-1.5 rounded-full",
+                aiConnected ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" : "bg-red-500/60"
               )}
             />
-            <span className="text-[10px] font-medium">
+            <span className="text-[10px] font-medium text-muted-foreground">
               {aiConnected ? "DCMA" : "Offline"}
             </span>
           </div>
@@ -107,10 +86,10 @@ export function Sidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="size-8"
+              className="size-7 text-muted-foreground hover:text-foreground"
               onClick={() => setSidebarOpen(false)}
             >
-              <PanelLeftClose className="size-4" />
+              <PanelLeftClose className="size-3.5" />
             </Button>
           )}
         </div>
@@ -127,29 +106,29 @@ export function Sidebar() {
             <Link key={href} href={href}>
               <div
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm",
                   isActive
-                    ? "border-l-2 border-primary bg-accent-soft"
-                    : "border-l-2 border-transparent hover:bg-accent/50"
+                    ? "bg-accent-soft text-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 )}
               >
-                <Icon className="size-4 text-muted-foreground" />
+                <Icon className="size-4" />
                 <span>{label}</span>
               </div>
             </Link>
           )
         })}
-        <div className="flex items-center gap-1">
-          <Link href="/settings" className="flex-1">
+        <div className="mt-1 border-t border-border pt-1">
+          <Link href="/settings">
             <div
               className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm",
                 pathname === "/settings"
-                  ? "border-l-2 border-primary bg-accent-soft"
-                  : "border-l-2 border-transparent hover:bg-accent/50"
+                  ? "bg-accent-soft text-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
               )}
             >
-              <Settings className="size-4 text-muted-foreground" />
+              <Settings className="size-4" />
               <span>Settings</span>
             </div>
           </Link>
@@ -161,28 +140,28 @@ export function Sidebar() {
   if (isMobile) {
     return (
       <>
-        <div className="flex h-12 items-center gap-2 border-b border-border bg-sidebar-background px-3 md:hidden">
+        <div className="flex h-11 items-center gap-2 border-b border-border bg-sidebar-background px-3 md:hidden">
           <Button
             variant="ghost"
             size="icon"
-            className="size-8"
+            className="size-8 text-muted-foreground"
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="size-4" />
           </Button>
-          <span className="text-lg font-semibold tracking-tight">
+          <span className="text-[15px] font-semibold tracking-tight">
             &#x25C7; OpenObsidian
           </span>
           <div className="flex-1" />
           <div className="relative">
             <span
               className={cn(
-                "absolute -right-0.5 -top-0.5 size-2 rounded-full border-2 border-sidebar-background",
-                aiConnected ? "bg-green-500" : "bg-red-500"
+                "absolute -right-0.5 -top-0.5 size-1.5 rounded-full",
+                aiConnected ? "bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" : "bg-red-500/60"
               )}
             />
             <Link href="/settings">
-              <Button variant="ghost" size="icon" className="size-8">
+              <Button variant="ghost" size="icon" className="size-8 text-muted-foreground">
                 <Settings className="size-4" />
               </Button>
             </Link>
@@ -205,28 +184,28 @@ export function Sidebar() {
 
   if (!sidebarOpen) {
     return (
-      <div className="flex h-full flex-col items-center gap-2 border-r border-border bg-sidebar-background p-2">
+      <div className="flex h-full flex-col items-center gap-1.5 border-r border-border bg-sidebar-background py-2">
         <Button
           variant="ghost"
           size="icon"
-          className="size-8"
+          className="size-8 text-muted-foreground hover:text-foreground"
           onClick={() => setSidebarOpen(true)}
         >
           <PanelLeft className="size-4" />
         </Button>
-        <Separator />
+        <Separator className="my-1" />
         <Link href="/dashboard">
-          <Button variant="ghost" size="icon" className="size-8">
+          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
             <Activity className="size-4" />
           </Button>
         </Link>
         <Link href="/insights">
-          <Button variant="ghost" size="icon" className="size-8">
+          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
             <Lightbulb className="size-4" />
           </Button>
         </Link>
         <Link href="/search">
-          <Button variant="ghost" size="icon" className="size-8">
+          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
             <Search className="size-4" />
           </Button>
         </Link>
@@ -234,12 +213,12 @@ export function Sidebar() {
         <div className="relative">
           <span
             className={cn(
-              "absolute -right-0.5 -top-0.5 size-2 rounded-full border-2 border-sidebar-background",
-              aiConnected ? "bg-green-500" : "bg-red-500"
+              "absolute -right-0.5 -top-0.5 size-1.5 rounded-full",
+              aiConnected ? "bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.5)]" : "bg-red-500/60"
             )}
           />
           <Link href="/settings">
-            <Button variant="ghost" size="icon" className="size-8">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
               <Settings className="size-4" />
             </Button>
           </Link>

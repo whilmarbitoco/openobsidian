@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
+
 import { Skeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/empty-state"
 import { Search, FileText, X } from "lucide-react"
@@ -67,15 +67,15 @@ export default function SearchPage() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Start typing to search your vault..."
-              className="h-12 pl-11 pr-10 text-lg ring-violet-500/30 focus-visible:ring-2"
+              className="h-12 pl-11 pr-10 text-base"
               autoFocus
             />
             {query && (
               <button
                 onClick={() => { setQuery(""); setResults([]); setSearched(false) }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:text-foreground"
               >
-                <X className="size-5" />
+                <X className="size-4" />
               </button>
             )}
           </div>
@@ -86,7 +86,7 @@ export default function SearchPage() {
             {loading ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                  <Skeleton key={i} className="h-20 w-full rounded-xl" />
                 ))}
               </div>
             ) : !searched ? (
@@ -103,7 +103,7 @@ export default function SearchPage() {
               />
             ) : (
               <div className="space-y-2">
-                <p className="mb-3 text-xs text-muted-foreground">
+                <p className="mb-3 text-sm text-muted-foreground">
                   {results.length} result{results.length !== 1 ? "s" : ""}
                 </p>
                 {results.map((result) => (
@@ -112,20 +112,20 @@ export default function SearchPage() {
                     onClick={() =>
                       router.push(`/note/${encodeURIComponent(result.path)}`)
                     }
-                    className="w-full rounded-lg border border-border bg-card p-4 text-left transition-all duration-150 hover:border-primary/30 hover:bg-accent/50 hover:shadow-elevated"
+                    className="w-full rounded-xl border border-border bg-card p-4 text-left transition-all duration-150 hover:border-primary/20 hover:bg-accent/40 hover:shadow-elevated"
                   >
-                    <h3 className="mb-1 text-sm font-medium">{result.title}</h3>
+                    <h3 className="mb-1 text-sm font-semibold">{result.title}</h3>
                     <p
-                      className="mb-2 text-xs text-muted-foreground leading-relaxed [&>mark]:rounded [&>mark]:bg-yellow-500/30 [&>mark]:px-0.5"
+                      className="mb-3 text-xs leading-relaxed text-muted-foreground [&>mark]:rounded [&>mark]:bg-yellow-500/20 [&>mark]:px-0.5 [&>mark]:text-foreground"
                       dangerouslySetInnerHTML={{ __html: result.snippet }}
                     />
                     <div className="flex items-center gap-2">
                       {result.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-[10px]">
+                        <span key={tag} className="rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-medium text-primary">
                           {tag}
-                        </Badge>
+                        </span>
                       ))}
-                      <span className="ml-auto text-[10px] text-muted-foreground">
+                      <span className="ml-auto text-xs text-muted-foreground">
                         {new Date(result.updatedAt).toLocaleDateString()}
                       </span>
                     </div>

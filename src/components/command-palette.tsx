@@ -272,11 +272,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   return createPortal(
     <div className="fixed inset-0 z-50">
       <div
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 bg-background/70 backdrop-blur-md"
         onClick={() => onOpenChange(false)}
       />
-      <div className="fixed left-1/2 top-[12%] w-full max-w-xl -translate-x-1/2 animate-scale-in">
-        <div className="overflow-hidden rounded-card border border-accent/20 bg-surface-elevated shadow-elevated">
+      <div className="fixed left-1/2 top-[10%] w-full max-w-xl -translate-x-1/2 animate-scale-in">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface-elevated/95 shadow-elevated backdrop-blur-xl">
           <div className="relative flex items-center border-b border-border">
             <Search className="absolute left-4 size-5 text-muted-foreground" />
             <input
@@ -288,18 +288,18 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               }}
               onKeyDown={handleKeyDown}
               placeholder="Search notes, tags, or actions..."
-              className="w-full border-0 bg-transparent py-4 pl-12 pr-4 text-lg outline-none placeholder:text-muted-foreground"
+              className="w-full border-0 bg-transparent py-4 pl-12 pr-4 text-base outline-none placeholder:text-muted-foreground"
             />
           </div>
 
           {selectable.length > 0 ? (
-            <div className="max-h-80 overflow-y-auto p-2" role="listbox">
+            <div className="max-h-80 overflow-y-auto p-1.5" role="listbox">
               {rows.map((row, i) => {
                 if (row.kind === "header") {
                   return (
                     <div
                       key={`hdr-${i}`}
-                      className="px-3 pb-1 pt-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+                      className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60"
                     >
                       {row.label}
                     </div>
@@ -316,10 +316,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     role="option"
                     aria-selected={isSelected}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors",
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
                       isSelected
-                        ? "border-l-2 border-primary bg-accent-soft"
-                        : "border-l-2 border-transparent hover:bg-accent/50"
+                        ? "bg-accent-soft"
+                        : "hover:bg-accent/40"
                     )}
                   >
                     {row.item.icon}
@@ -330,7 +330,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                           : row.item.label}
                       </div>
                       {row.item.description && (
-                        <div className="truncate text-xs text-muted-foreground">
+                        <div className="truncate text-xs text-muted-foreground/70">
                           {q
                             ? highlightMatch(row.item.description, q)
                             : row.item.description}
@@ -343,8 +343,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 py-12 text-center">
-              <Search className="size-8 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">
+              <Search className="size-8 text-muted-foreground/20" />
+              <p className="text-sm text-muted-foreground/60">
                 {query.trim() ? (
                   <>No results for &ldquo;{query}&rdquo;</>
                 ) : (
@@ -354,12 +354,12 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-3 border-t border-border px-4 py-2">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center justify-end gap-3 border-t border-border/50 px-4 py-2">
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground/50">
               <CornerDownLeft className="size-3" /> select
             </span>
-            <span className="text-xs text-muted-foreground">&uarr;&darr; navigate</span>
-            <span className="text-xs text-muted-foreground">esc close</span>
+            <span className="text-[11px] text-muted-foreground/50">&uarr;&darr; navigate</span>
+            <span className="text-[11px] text-muted-foreground/50">esc close</span>
           </div>
         </div>
       </div>

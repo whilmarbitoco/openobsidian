@@ -91,19 +91,19 @@ export default function GraphPage() {
               tagFilter={tagFilter}
             />
 
-            <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-full border border-border bg-surface-elevated/90 px-3 py-1.5 shadow-elevated backdrop-blur-sm">
-              <Search className="size-3.5 shrink-0 text-muted-foreground" />
+            <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-lg border border-border/50 bg-surface-elevated/95 px-3 py-2 shadow-elevated backdrop-blur-md">
+              <Search className="size-3.5 shrink-0 text-muted-foreground/60" />
               <input
                 value={highlightTerm}
                 onChange={(e) => setHighlightTerm(e.target.value)}
                 placeholder="Search nodes..."
-                className="h-6 w-28 bg-transparent text-xs outline-none placeholder:text-muted-foreground/50 md:w-36"
+                className="h-5 w-28 bg-transparent text-xs outline-none placeholder:text-muted-foreground/40 md:w-36"
               />
-              <span className="h-4 w-px bg-border" />
+              <span className="h-3 w-px bg-border/50" />
               <select
                 value={tagFilter ?? "all"}
                 onChange={(e) => setTagFilter(e.target.value === "all" ? null : e.target.value)}
-                className="h-6 max-w-[100px] bg-transparent text-xs outline-none"
+                className="h-5 max-w-[100px] bg-transparent text-xs outline-none"
               >
                 <option value="all">All tags</option>
                 {allTags.map((tag) => (
@@ -114,21 +114,21 @@ export default function GraphPage() {
               </select>
               <button
                 onClick={loadGraph}
-                className="ml-0.5 rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground"
+                className="ml-0.5 rounded-full p-1 text-muted-foreground/60 transition-colors hover:text-foreground"
                 title="Reset view"
               >
                 <RotateCcw className="size-3" />
               </button>
             </div>
 
-            <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-border bg-surface-elevated/90 px-3 py-2 shadow-elevated backdrop-blur-sm">
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="absolute bottom-4 left-4 z-10 rounded-lg border border-border/50 bg-surface-elevated/95 px-3 py-2 shadow-elevated backdrop-blur-md">
+              <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
                 <span className="tabular-nums">{data.nodes.length} nodes</span>
                 <span className="tabular-nums">{data.edges.length} edges</span>
-                {allTags.map((tag) => (
+                {allTags.slice(0, 4).map((tag) => (
                   <span key={tag} className="flex items-center gap-1">
                     <span
-                      className="inline-block size-2 rounded-full"
+                      className="inline-block size-1.5 rounded-full"
                       style={{ backgroundColor: getTagColor(tag) }}
                     />
                     <span>{tag}</span>

@@ -178,21 +178,22 @@ export default function NotePage() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 shrink-0"
+            className="size-7 shrink-0 text-muted-foreground"
             onClick={() => router.push("/dashboard")}
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-3.5" />
           </Button>
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="truncate text-sm font-medium">{note.title}</span>
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground/50">
               <span>vault</span>
               {breadcrumbParts.map((part, i) => (
                 <Fragment key={i}>
-                  <span className="text-muted-foreground/40">/</span>
+                  <span className="text-muted-foreground/30">/</span>
                   <span
                     className={cn(
-                      i === breadcrumbParts.length - 1 && "font-medium text-foreground"
+                      i === breadcrumbParts.length - 1 && "text-muted-foreground/70"
                     )}
                   >
                     {part}
@@ -200,65 +201,65 @@ export default function NotePage() {
                 </Fragment>
               ))}
             </div>
-            <span className="truncate text-sm font-medium">{note.title}</span>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{wordCount} words</span>
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground/60">
+            <span className="tabular-nums">{wordCount}w</span>
           </div>
 
           <div className="flex items-center gap-1.5">
             {isSaving || autoSaving ? (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="inline-block size-2 animate-pulse rounded-full bg-yellow-500" />
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
+                <span className="inline-block size-1.5 animate-pulse rounded-full bg-yellow-500" />
                 Saving...
               </span>
             ) : hasChanges ? (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="inline-block size-2 rounded-full bg-yellow-500" />
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60">
+                <span className="inline-block size-1.5 rounded-full bg-yellow-500" />
                 Unsaved
               </span>
             ) : (
-              <span className="flex items-center gap-1.5 text-xs text-green-400">
-                <span className="inline-block size-2 rounded-full bg-green-500" />
+              <span className="flex items-center gap-1.5 text-[11px] text-green-500/80">
+                <span className="inline-block size-1.5 rounded-full bg-green-500" />
                 Saved
               </span>
             )}
           </div>
 
-          <Separator orientation="vertical" className="mx-1 h-6" />
+          <Separator orientation="vertical" className="mx-0.5 h-5" />
 
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 shrink-0 text-destructive hover:text-destructive"
+            className="size-7 shrink-0 text-destructive/70 hover:text-destructive"
             onClick={handleDelete}
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-3.5" />
           </Button>
           <Button
             size="sm"
             onClick={handleSave}
             disabled={isSaving || !hasChanges}
+            className="h-7 text-xs"
           >
-            <Save className="size-4" />
+            <Save className="size-3.5" />
             {isSaving ? "Saving..." : "Save"}
           </Button>
         </header>
 
         {note.tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-border/50 px-4 py-1.5">
             {note.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-0.5 text-xs text-primary"
+                className="inline-flex items-center gap-1 rounded-full bg-accent-soft/60 px-2.5 py-0.5 text-[11px] font-mono text-primary/80"
               >
-                <Hash className="size-3" />
+                <Hash className="size-2.5" />
                 {tag}
               </span>
             ))}
-            <button className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent-soft hover:text-primary">
-              <Plus className="size-3" />
+            <button className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] text-muted-foreground/40 transition-colors hover:text-muted-foreground/70">
+              <Plus className="size-2.5" />
               Add tag
             </button>
           </div>

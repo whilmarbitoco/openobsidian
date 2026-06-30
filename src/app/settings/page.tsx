@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { useStore } from "@/store/useStore"
 import { getSettings, saveSettings, openVault } from "@/lib/vault"
+import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { toast } from "sonner"
 import {
@@ -143,20 +143,20 @@ export default function SettingsPage() {
     <div className="flex h-screen">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-2xl p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Settings</h1>
-          </div>
+        <div className="mx-auto max-w-2xl p-8">
+          <h1 className="mb-8 text-2xl font-bold tracking-tight">Settings</h1>
 
-          <section className="mb-8">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <FolderOpen className="size-4" />
+          <section className="mb-10">
+            <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold tracking-tight">
+              <FolderOpen className="size-4 text-muted-foreground" />
               Vault
             </h2>
-            <Separator className="mb-4" />
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="vaultPath">Vault Path</Label>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Open a folder containing .md files to build your knowledge graph.
+            </p>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="vaultPath" className="text-xs font-medium text-muted-foreground">Path</Label>
                 <div className="flex gap-2">
                   <Input
                     id="vaultPath"
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                     className="font-mono text-sm"
                   />
                   <Button onClick={handleOpenVault} variant="secondary">
-                    <FolderOpen className="size-4" />
+                    <FolderOpen className="size-3.5" />
                     Open
                   </Button>
                 </div>
@@ -175,143 +175,129 @@ export default function SettingsPage() {
                     {truncateMiddle(vaultPath)}
                   </p>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  Absolute path to a folder containing .md files
-                </p>
               </div>
             </div>
           </section>
 
-          <section className="mb-8">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+          <section className="mb-10">
+            <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold tracking-tight">
               {theme === "dark" ? (
-                <Moon className="size-4" />
+                <Moon className="size-4 text-muted-foreground" />
               ) : (
-                <Sun className="size-4" />
+                <Sun className="size-4 text-muted-foreground" />
               )}
               Appearance
             </h2>
-            <Separator className="mb-4" />
-            <div className="flex items-center gap-4">
+            <p className="mb-4 text-sm text-muted-foreground">
+              Choose how OpenObsidian looks.
+            </p>
+            <div className="flex items-center gap-3">
               <Button
                 variant={theme === "dark" ? "default" : "outline"}
                 onClick={() => setTheme("dark")}
                 className="gap-2"
+                size="sm"
               >
-                <Moon className="size-4" />
+                <Moon className="size-3.5" />
                 Dark
               </Button>
               <Button
                 variant={theme === "light" ? "default" : "outline"}
                 onClick={() => setTheme("light")}
                 className="gap-2"
+                size="sm"
               >
-                <Sun className="size-4" />
+                <Sun className="size-3.5" />
                 Light
               </Button>
             </div>
           </section>
 
-          <section className="mb-8">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <Server className="size-4" />
+          <section className="mb-10">
+            <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold tracking-tight">
+              <Server className="size-4 text-muted-foreground" />
               AI Backend
             </h2>
-            <Separator className="mb-4" />
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="aiBackendUrl">AI Backend Endpoint</Label>
+            <p className="mb-4 text-sm text-muted-foreground">
+              DCMA unlocks conflict detection, link suggestions, and knowledge chat. It runs locally on your machine.
+            </p>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="aiBackendUrl" className="text-xs font-medium text-muted-foreground">Endpoint</Label>
                 <Input
                   id="aiBackendUrl"
                   value={aiBackendUrl}
                   onChange={(e) => setAiBackendUrl(e.target.value)}
-                  placeholder="http://localhost:8080"
+                  placeholder="http://localhost:3030"
                 />
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Database className="size-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Status:</span>
-                {testingBackend ? (
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <RefreshCw className="size-3.5 animate-spin" />
-                    Testing...
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "inline-block size-2 rounded-full",
+                      aiConnected ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" : "bg-red-500/60"
+                    )}
+                  />
+                  <span className="text-sm">
+                    {testingBackend ? (
+                      <span className="text-muted-foreground">Testing...</span>
+                    ) : aiConnected ? (
+                      <span className="text-green-500">Connected</span>
+                    ) : (
+                      <span className="text-muted-foreground">Disconnected</span>
+                    )}
                   </span>
-                ) : aiConnected ? (
-                  <span className="flex items-center gap-1.5 text-green-500">
-                    <span className="inline-block size-2 animate-pulse rounded-full bg-green-500" />
-                    Connected
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <span className="inline-block size-2 rounded-full bg-red-500/50" />
-                    Disconnected
-                  </span>
-                )}
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={checkBackend}
                   disabled={testingBackend}
-                  className="ml-2"
+                  className="h-7 px-2 text-xs"
                 >
                   <Wifi className="mr-1 size-3" />
-                  {testingBackend ? "Testing..." : "Test Connection"}
+                  {testingBackend ? "Testing..." : "Test"}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                The app works without an AI backend — shows basic links and full-text search.
-              </p>
             </div>
           </section>
 
-          <section className="mb-8">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <Database className="size-4" />
-              Index Stats
+          <section className="mb-10">
+            <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold tracking-tight">
+              <Database className="size-4 text-muted-foreground" />
+              Index
             </h2>
-            <Separator className="mb-4" />
+            <p className="mb-4 text-sm text-muted-foreground">
+              Statistics about your vault&apos;s search index.
+            </p>
             {loadingStats ? (
               <div className="space-y-2">
                 <div className="h-5 w-32 animate-pulse rounded bg-muted" />
                 <div className="h-5 w-28 animate-pulse rounded bg-muted" />
-                <div className="h-5 w-40 animate-pulse rounded bg-muted" />
               </div>
             ) : stats ? (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <FileText className="mx-auto mb-1 size-4 text-muted-foreground" />
-                      <p className="text-lg font-bold tabular-nums">{stats.totalNotes}</p>
-                      <p className="text-[10px] text-muted-foreground">Notes</p>
-                    </div>
-                    <div className="text-center">
-                      <Link2 className="mx-auto mb-1 size-4 text-muted-foreground" />
-                      <p className="text-lg font-bold tabular-nums">{stats.totalLinks}</p>
-                      <p className="text-[10px] text-muted-foreground">Links</p>
-                    </div>
-                    <div className="text-center">
-                      <Clock className="mx-auto mb-1 size-4 text-muted-foreground" />
-                      <p className="text-lg font-bold tabular-nums">
-                        {stats.lastReindex
-                          ? new Date(stats.lastReindex).toLocaleDateString()
-                          : "—"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">Last reindex</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex justify-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={loadStats}
-                    >
-                      <RefreshCw className="mr-1 size-3" />
-                      Refresh Stats
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <FileText className="mx-auto mb-1.5 size-4 text-muted-foreground" />
+                  <p className="text-2xl font-bold tabular-nums">{stats.totalNotes}</p>
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">Notes</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <Link2 className="mx-auto mb-1.5 size-4 text-muted-foreground" />
+                  <p className="text-2xl font-bold tabular-nums">{stats.totalLinks}</p>
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">Links</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <Clock className="mx-auto mb-1.5 size-4 text-muted-foreground" />
+                  <p className="text-2xl font-bold tabular-nums">
+                    {stats.lastReindex
+                      ? new Date(stats.lastReindex).toLocaleDateString()
+                      : "—"}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">Reindexed</p>
+                </div>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Open a vault to see index statistics.
@@ -319,14 +305,13 @@ export default function SettingsPage() {
             )}
           </section>
 
-          <section className="mb-8 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-destructive">
+          <section className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
+            <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-destructive">
               <AlertTriangle className="size-4" />
               Danger Zone
             </h2>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Clear the search index and reindex from scratch. Your note files
-              will not be affected.
+            <p className="mb-4 text-sm text-muted-foreground">
+              Clear the search index and reindex from scratch. Your note files will not be affected.
             </p>
             <Button
               variant="destructive"
@@ -338,7 +323,7 @@ export default function SettingsPage() {
             </Button>
           </section>
 
-          <div className="flex justify-end">
+          <div className="mt-10 flex justify-end border-t border-border pt-6">
             <Button onClick={handleSave} disabled={saving}>
               {saving ? "Saving..." : "Save Settings"}
             </Button>

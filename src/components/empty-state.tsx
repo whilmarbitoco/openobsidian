@@ -20,11 +20,13 @@ export function EmptyState({
   actionOnClick,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-8 text-center">
-      <Icon className="mb-3 size-12 text-muted-foreground/40" />
-      <p className="mb-1 text-sm font-medium text-muted-foreground">{title}</p>
+    <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card/30 px-6 py-12 text-center">
+      <div className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-border bg-card">
+        <Icon className="size-6 text-muted-foreground" />
+      </div>
+      <p className="mb-1.5 text-sm font-medium">{title}</p>
       {description && (
-        <p className="mb-4 max-w-sm text-xs text-muted-foreground/60">
+        <p className="mb-5 max-w-xs text-sm leading-relaxed text-muted-foreground">
           {description}
         </p>
       )}

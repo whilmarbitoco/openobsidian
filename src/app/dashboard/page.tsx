@@ -95,95 +95,131 @@ export default function DashboardPage() {
     <div className="flex h-screen">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-4xl p-6">
-          <div className="mb-6 flex items-start justify-between">
+        <div className="mx-auto max-w-4xl p-8">
+          <div className="mb-8 flex items-end justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">{greeting}</h1>
-              <p className="mt-1 font-mono text-xs text-muted-foreground tabular-nums">
-                ↓ {notes.length} notes
-                {untaggedNotes.length > 0 &&
-                  ` · ${untaggedNotes.length} untagged`}
-                {orphanNotes.length > 0 && ` · ${orphanNotes.length} orphan`}
-                {mostRecentTime && ` · updated ${mostRecentTime} ago`}
+              <h1 className="text-3xl font-bold tracking-tight">{greeting}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {notes.length} notes · {notes.reduce((a, n) => a + n.links.length, 0)} links · {mostRecentTime ? `updated ${mostRecentTime} ago` : "never"}
               </p>
             </div>
             <Button onClick={handleNewNote} className="gap-2">
               <Plus className="size-4" />
               New Note
-              <span className="ml-1 rounded border border-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-mono opacity-60">
+              <kbd className="ml-1 rounded border border-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-mono opacity-60">
                 ⌘N
-              </span>
+              </kbd>
             </Button>
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">
+            <div className="py-16 text-center text-sm text-muted-foreground">
               Loading notes...
             </div>
           ) : !settings.vaultPath ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-              <FileText className="size-12 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">
-                No vault open. Configure your vault path in Settings to get
-                started.
-              </p>
+            <div className="flex flex-col items-center justify-center gap-5 py-20 text-center">
+              <div className="flex size-16 items-center justify-center rounded-2xl border border-border bg-card">
+                <FileText className="size-7 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-base font-medium">No vault open</p>
+                <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                  Open a folder containing .md files to start building your knowledge graph.
+                </p>
+              </div>
+              <Button onClick={() => router.push("/settings")}>
+                Open Settings
+              </Button>
             </div>
           ) : recentNotes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-              <FileText className="size-12 text-muted-foreground/40" />
-              <p className="text-base font-medium">Your vault is quiet</p>
-              <p className="text-sm text-muted-foreground">
-                Let&apos;s change that →
-              </p>
+            <div className="flex flex-col items-center justify-center gap-5 py-20 text-center">
+              <div className="flex size-16 items-center justify-center rounded-2xl border border-border bg-card">
+                <FileText className="size-7 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-base font-medium">Your vault is quiet</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Create your first note to start connecting ideas.
+                </p>
+              </div>
               <Button onClick={handleNewNote}>
                 <Plus className="size-4" />
                 New Note
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {recentNotes.map((note) => {
-                const preview = getPreview(note.content)
-                return (
-                  <button
-                    key={note.path}
-                    onClick={() =>
-                      router.push(`/note/${encodeURIComponent(note.path)}`)
-                    }
-                    className="group flex flex-col items-start gap-2 rounded-[var(--radius-card)] border border-border bg-card p-4 text-left shadow-elevated transition-all duration-150 hover:translate-y-[-2px] hover:shadow-lg hover:bg-accent/50"
-                  >
-                    <div className="flex w-full items-start justify-between gap-2">
-                      <p className="truncate text-sm font-medium">
-                        {note.title || "Untitled"}
-                      </p>
-                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
-                        {new Date(note.updatedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {preview && (
-                      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                        {preview}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-1.5">
-                      {note.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="font-mono text-[10px] text-muted-foreground/70"
-                        >
-                          #{tag}
+            <>
+              {/* Stats summary */}
+              <div className="mb-6 grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-border bg-card px-5 py-4">
+                  <p className="text-3xl font-bold tabular-nums">{notes.length}</p>
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">Notes</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card px-5 py-4">
+                  <p className="text-3xl font-bold tabular-nums">
+                    {notes.reduce((acc, n) => acc + n.links.length, 0)}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">Links</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card px-5 py-4">
+                  <p className="text-3xl font-bold tabular-nums">
+                    {new Set(notes.flatMap((n) => n.tags)).size}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-muted-foreground">Tags</p>
+                </div>
+              </div>
+
+              {/* Section header */}
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Recent Notes
+              </h2>
+
+              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                {recentNotes.map((note) => {
+                  const preview = getPreview(note.content)
+                  return (
+                    <button
+                      key={note.path}
+                      onClick={() =>
+                        router.push(`/note/${encodeURIComponent(note.path)}`)
+                      }
+                      className="group flex flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 text-left transition-all duration-150 hover:border-primary/20 hover:bg-accent/40 hover:shadow-elevated"
+                    >
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <p className="truncate text-sm font-semibold">
+                          {note.title || "Untitled"}
+                        </p>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {new Date(note.updatedAt).toLocaleDateString()}
                         </span>
-                      ))}
-                      {note.tags.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground/50">
-                          +{note.tags.length - 3}
-                        </span>
+                      </div>
+                      {preview && (
+                        <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                          {preview}
+                        </p>
                       )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+                      {note.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {note.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-medium text-primary"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                          {note.tags.length > 3 && (
+                            <span className="text-[10px] text-muted-foreground">
+                              +{note.tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
       </main>

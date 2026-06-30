@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/sidebar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent } from "@/components/ui/card"
+
 import { useStore } from "@/store/useStore"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -161,7 +161,7 @@ export default function InsightsPage() {
         </header>
 
         <ScrollArea className="flex-1">
-          <div className="mx-auto max-w-4xl space-y-6 p-6">
+          <div className="mx-auto max-w-4xl space-y-8 p-8">
             <Section
               icon={<Clock className="size-4" />}
               title="Recently Modified"
@@ -169,7 +169,7 @@ export default function InsightsPage() {
               {loadingNotes ? (
                 <div className="space-y-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
+                    <Skeleton key={i} className="h-10 w-full" />
                   ))}
                 </div>
               ) : recentNotes.length === 0 ? (
@@ -188,7 +188,7 @@ export default function InsightsPage() {
                       onClick={() =>
                         router.push(`/note/${encodeURIComponent(note.path)}`)
                       }
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent/40"
                     >
                       <FileText className="size-4 shrink-0 text-muted-foreground" />
                       <div className="min-w-0 flex-1">
@@ -216,7 +216,7 @@ export default function InsightsPage() {
               count={untaggedNotes.length}
             >
               {loadingNotes ? (
-                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-20 w-full" />
               ) : untaggedNotes.length === 0 ? (
                 <EmptyState
                   icon={Hash}
@@ -231,9 +231,9 @@ export default function InsightsPage() {
                       onClick={() =>
                         router.push(`/note/${encodeURIComponent(note.path)}`)
                       }
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs hover:bg-accent transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm transition-colors hover:bg-accent/40"
                     >
-                      <FileText className="size-3 shrink-0" />
+                      <FileText className="size-3 text-muted-foreground" />
                       {note.title}
                     </button>
                   ))}
@@ -247,7 +247,7 @@ export default function InsightsPage() {
               count={orphanNotes.length}
             >
               {loadingNotes ? (
-                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-20 w-full" />
               ) : orphanNotes.length === 0 ? (
                 <EmptyState
                   icon={Link2}
@@ -262,9 +262,9 @@ export default function InsightsPage() {
                       onClick={() =>
                         router.push(`/note/${encodeURIComponent(note.path)}`)
                       }
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs hover:bg-accent transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm transition-colors hover:bg-accent/40"
                     >
-                      <FileText className="size-3 shrink-0" />
+                      <FileText className="size-3 text-muted-foreground" />
                       {note.title}
                     </button>
                   ))}
@@ -281,7 +281,7 @@ export default function InsightsPage() {
                   {loadingAi ? (
                     <div className="space-y-2">
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
+                        <Skeleton key={i} className="h-14 w-full" />
                       ))}
                     </div>
                   ) : linkSuggestions.length === 0 ? (
@@ -293,22 +293,20 @@ export default function InsightsPage() {
                   ) : (
                     <div className="space-y-2">
                       {linkSuggestions.map((s) => (
-                        <Card key={s.id}>
-                          <CardContent className="p-3">
-                            <div className="mb-1.5 flex items-center gap-2 text-sm">
-                              <span className="font-mono text-xs font-medium">
-                                {s.noteA}
-                              </span>
-                              <ArrowRight className="size-3 text-muted-foreground shrink-0" />
-                              <span className="font-mono text-xs font-medium">
-                                {s.noteB}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {s.reason}
-                            </p>
-                          </CardContent>
-                        </Card>
+                        <div key={s.id} className="rounded-xl border border-border bg-card p-4">
+                          <div className="mb-2 flex items-center gap-2 text-sm">
+                            <span className="font-mono text-sm font-medium">
+                              {s.noteA}
+                            </span>
+                            <ArrowRight className="size-3 text-muted-foreground" />
+                            <span className="font-mono text-sm font-medium">
+                              {s.noteB}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {s.reason}
+                          </p>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -321,7 +319,7 @@ export default function InsightsPage() {
                   {loadingAi ? (
                     <div className="space-y-2">
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-24 w-full" />
+                        <Skeleton key={i} className="h-20 w-full" />
                       ))}
                     </div>
                   ) : insightConflicts.length === 0 ? (
@@ -331,42 +329,34 @@ export default function InsightsPage() {
                       description="Your knowledge base is consistent."
                     />
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {insightConflicts.map((c) => (
-                        <Card key={c.id} className="border-amber-500/20">
-                          <CardContent className="p-3">
-                            <div className="relative mb-2 flex items-center gap-3">
-                              <div className="flex-1 rounded-md bg-card p-2 text-xs">
-                                <p className="mb-1 font-medium text-amber-400">
-                                  Note A
-                                </p>
-                                <p className="font-mono text-muted-foreground">
-                                  {c.noteA}
-                                </p>
-                              </div>
-                              <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 text-xs font-medium text-amber-400">
-                                vs
-                              </div>
-                              <div className="flex-1 rounded-md bg-card p-2 text-xs">
-                                <p className="mb-1 font-medium text-amber-400">
-                                  Note B
-                                </p>
-                                <p className="font-mono text-muted-foreground">
-                                  {c.noteB}
-                                </p>
-                              </div>
+                        <div key={c.id} className="rounded-xl border border-amber-500/20 bg-card p-4">
+                          <div className="relative mb-3 flex items-center gap-3">
+                            <div className="flex-1 rounded-lg bg-card/80 border border-border p-3">
+                              <p className="mb-1 text-xs font-medium text-amber-500">
+                                Note A
+                              </p>
+                              <p className="font-mono text-sm text-muted-foreground">
+                                {c.noteA}
+                              </p>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>
-                                {c.description}
-                              </span>
-                              <span>
-                                Detected{" "}
-                                {new Date(c.detectedAt).toLocaleDateString()}
-                              </span>
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 text-xs font-semibold text-amber-500">
+                              vs
                             </div>
-                          </CardContent>
-                        </Card>
+                            <div className="flex-1 rounded-lg bg-card/80 border border-border p-3">
+                              <p className="mb-1 text-xs font-medium text-amber-500">
+                                Note B
+                              </p>
+                              <p className="font-mono text-sm text-muted-foreground">
+                                {c.noteB}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {c.description}
+                          </p>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -377,26 +367,23 @@ export default function InsightsPage() {
                 icon={<WifiOff className="size-4" />}
                 title="AI-Powered Insights"
               >
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <WifiOff className="mx-auto mb-3 size-8 text-muted-foreground/50" />
-                    <p className="mb-1 text-sm font-medium">
-                      AI backend is not connected
-                    </p>
-                    <p className="mb-4 text-xs text-muted-foreground">
-                      Start the AI backend to enable insights
-                      including suggested links and conflict detection.
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push("/settings")}
-                    >
-                      <Wifi className="size-4" />
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
+                <div className="rounded-xl border border-border bg-card p-6 text-center">
+                  <WifiOff className="mx-auto mb-3 size-8 text-muted-foreground" />
+                  <p className="mb-1 text-sm font-medium">
+                    AI backend is not connected
+                  </p>
+                  <p className="mb-4 text-sm text-muted-foreground">
+                    Start the AI backend to enable insights including suggested links and conflict detection.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push("/settings")}
+                  >
+                    <Wifi className="size-4" />
+                    Configure
+                  </Button>
+                </div>
               </Section>
             ) : null}
           </div>
@@ -421,11 +408,11 @@ function Section({
     <section>
       <div className="mb-3 flex items-center gap-2">
         <span className="text-muted-foreground">{icon}</span>
-        <h2 className="text-sm font-semibold">{title}</h2>
+        <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
         {count !== undefined && (
-          <Badge variant="secondary" className="text-[10px]">
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
             {count}
-          </Badge>
+          </span>
         )}
       </div>
       {children}
